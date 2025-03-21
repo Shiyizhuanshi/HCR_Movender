@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ROS Bridge Web App</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 20px;
+      background-color: #f8f9fa;
+    }
+    h1 {
+      text-align: center;
+      color: #333;
+    }
+    .control-panel {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      justify-content: center;
+      margin-bottom: 15px;
+    }
+    .btn {
+      padding: 8px 12px;
+      cursor: pointer;
+      border: none;
+      border-radius: 5px;
+    }
+    .btn-primary { background-color: #007bff; color: white; }
+    .btn-danger { background-color: #dc3545; color: white; }
+    .btn:hover { opacity: 0.8; }
+    #channels {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      justify-content: center;
+    }
+    .channel {
+      width: 48%;
+      min-width: 300px;
+      box-sizing: border-box;
+      padding: 15px;
+      border-radius: 8px;
+      background: white;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+    }
+    .messages {
+      max-height: 150px;
+      overflow-y: auto;
+      border: 1px solid #ddd;
+      padding: 5px;
+      margin-top: 5px;
+      background: #f0f0f0;
+    }
+    @media (max-width: 768px) {
+      .channel { width: 100%; }
+    }
+  </style>
+</head>
+<body>
+
+  <h1>ROS Bridge Web App</h1>
+
+  <div class="control-panel">
+    <button class="btn btn-primary" onclick="addChannel('subscribe')">New Subscribe Channel</button>
+    <button class="btn btn-primary" onclick="addChannel('publish')">New Publish Channel</button>
+  </div>
+
+  <div id="channels"></div>
+
+  <script>
+    const ros = new WebSocket("ws://0.0.0.0:9090");
+    const channels = { subscribe: {}, publish: {} };
+    const intervals = {};
+
+    ros.onopen = () => console.log("Connected to rosbridge");
+
+    ros.onmessage = (event) => {
+      const data = JSON.parse(event.data);
+      if (data.op === "publish") {
+        const topic = data.topic;
+        let msgContent = "";
+        if (data.msg.data !== undefined) {
+          msgContent = data.msg.data;
+        } else {
+          msgContent = JSON.stringify(data.msg);
+        }
+        if (channels.subscribe[topic]) {
+          const msgList = channels.subscribe[topic].element.querySelector(".messages");
+          const msgItem = document.createElement("li");
+          msgItem.textContent = msgContent;
+          msgList.appendChild(msgItem);
+          msgList.scrollTop = msgList.scrollHeight;
+        }
+      }
+    };
+
+    function addChannel(type) {
+      const topic = prompt(`Enter topic name for ${type}:`);
+      if (!topic) return;
+
+      if (channels[type][topic]) {
+        alert(`A ${type} channel for "${topic}" already exists.`);
+        return;
+      }
+
+      let msgType = prompt("Enter message type (msg/twist):", "msg");
+      if (msgType != "msg") msgType = "twist";
+
+      const channelDiv = document.createElement("div");
+      channelDiv.className = "channel";
+      let content = `<h2>${type.toUpperCase()}: ${topic} (${msgType.toUpperCase()})</h2>`;
+
+      if (type === "subscribe") {
+        content += `<ul class="messages"></ul>`;
+      } else {
+        if (msgType === "twist") {
+          content += `<p>Use keyboard (W/A/S/D) to control robot.</p>`;
+        } else {
+          content += `
+            <input type="text" id="message-${topic}" placeholder="Enter message" />
+            <input type="number" id="frequency-${topic}" placeholder="Frequency (ms)" min="0" />
+            <button class="btn btn-primary" onclick="sendMessage('${topic}')">Send</button>
+            <button class="btn btn-primary" onclick="startAutoSend('${topic}')">Start Auto</button>
+            <button class="btn btn-danger" onclick="stopAutoSend('${topic}')">Stop Auto</button>
+          `;
+        }
+      }
+      content += `<button class="btn btn-danger" onclick="removeChannel('${type}', '${topic}')">Close</button>`;
+      channelDiv.innerHTML = content;
+      document.getElementById("channels").appendChild(channelDiv);
+      channels[type][topic] = { element: channelDiv, msgType: msgType };
+
+      if (type === "subscribe") {
+        const subscribeType = (msgType === "twist") ? "geometry_msgs/Twist" : "std_msgs/String";
+        ros.send(JSON.stringify({ op: "subscribe", topic: topic, type: subscribeType }));
+      }
+    }
+
+    function removeChannel(type, topic) {
+      if (channels[type][topic]) {
+        if (type === "subscribe") {
+          ros.send(JSON.stringify({ op: "unsubscribe", topic: topic }));
+        }
+        channels[type][topic].element.remove();
+        delete channels[type][topic];
+      }
+      stopAutoSend(topic);
+    }
+
+    function sendMessage(topic) {
+      const channel = channels.publish[topic];
+      if (!channel) return;
+      if (channel.msgType === "twist") {
+        alert("This is a TWIST channel. Use keyboard to control.");
+        return;
+      }
+      const input = document.getElementById(`message-${topic}`);
+      if (!input) return;
+      const message = input.value;
+      if (message.trim() === "") {
+        alert("Message cannot be empty");
+        return;
+      }
+      ros.send(JSON.stringify({ op: "publish", topic: topic, msg: { data: message } }));
+    }
+
+    function startAutoSend(topic) {
+      const channel = channels.publish[topic];
+      if (!channel) return;
+      if (channel.msgType === "twist") {
+        alert("This is a TWIST channel. Use keyboard to control.");
+        return;
+      }
+      const input = document.getElementById(`message-${topic}`);
+      const freqInput = document.getElementById(`frequency-${topic}`);
+      if (!input || !freqInput) return;
+      const message = input.value;
+      let frequency = parseInt(freqInput.value, 10);
+
+      if (message.trim() === "") {
+        alert("Message cannot be empty");
+        return;
+      }
+      if (isNaN(frequency) || frequency < 0) {
+        alert("Frequency must be a positive number or 0");
+        return;
+      }
+
+      stopAutoSend(topic);
+
+      if (frequency === 0) {
+        sendMessage(topic);
+      } else {
+        intervals[topic] = setInterval(() => {
+          sendMessage(topic);
+        }, frequency);
+        alert(`Started sending messages every ${frequency} ms.`);
+      }
+    }
+
+    function stopAutoSend(topic) {
+      if (intervals[topic]) {
+        clearInterval(intervals[topic]);
+        delete intervals[topic];
+        alert(`Stopped auto message sending for ${topic}`);
+      }
+    }
+
+    document.addEventListener("keydown", function(event) {
+      const key = event.key.toLowerCase();
+      if (["w", "a", "s", "d"].includes(key)) {
+        let twistMsg = {
+          linear: { x: 0, y: 0, z: 0 },
+          angular: { x: 0, y: 0, z: 0 }
+        };
+        if (key === "w") {
+          twistMsg.linear.x = 1;
+        } else if (key === "s") {
+          twistMsg.linear.x = -1;
+        } else if (key === "a") {
+          twistMsg.angular.z = 1;
+        } else if (key === "d") {
+          twistMsg.angular.z = -1;
+        }
+        for (let topic in channels.publish) {
+          if (channels.publish[topic].msgType === "twist") {
+            ros.send(JSON.stringify({ op: "publish", topic: topic, msg: twistMsg }));
+          }
+        }
+      }
+    });
+  </script>
+
+</body>
+</html>

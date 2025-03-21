@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Movender</title>
+  <link rel="stylesheet" href="src/style.css" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.8.1/font/bootstrap-icons.css" />
+</head>
+<body>
+  <div class="navbar">
+    <a href="index.html">
+      <h2>Movender</h2>
+    </a>
+    <a href="index.html">
+      <div class="cart">
+        <i class="bi bi-cart2"></i>
+        <div id="cartAmount" class="cartAmount">0</div>
+      </div>
+    </a>
+  </div>
+
+  <h5 id="countdown-text" class="countdown">Transaction in Progress... 30s</h5>
+  <h5>Please tap your card</h5>
+
+  <script src="https://cdn.socket.io/4.3.2/socket.io.min.js"></script>
+  <script src="src/Data.js"></script>
+  <script src="https://cdn.socket.io/4.3.2/socket.io.min.js"></script>
+
+  <script>
+    window.socket = io("http://172.26.185.61:5001", {
+      transports: ["websocket"],
+    });
+  
+    window.socket.on("connect", () => {
+      console.log("✅ Connected to server (payment.html)");
+      
+      const cartQuantity = getQuantityById(1);
+      window.socket.emit("send_payment", { quantity: cartQuantity });
+      console.log("Sent payment request for quantity:", cartQuantity);
+    });
+  
+    window.socket.on("payment", (data) => {
+      console.log("Received payment status:", data);
+      if (data.success === 1) {
+        window.location.href = "success.html";
+      }
+    });
+  
+    function getQuantityById(id) {
+      const cartData = localStorage.getItem("data");
+      if (!cartData) return 0;
+      try {
+        const parsedCart = JSON.parse(cartData);
+        const product = parsedCart.find(item => item.id === id);
+        return product ? product.item : 0;
+      } catch {
+        return 0;
+      }
+    }
+  </script>
+  
+</body>
+</html> 

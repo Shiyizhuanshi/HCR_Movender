@@ -1,0 +1,280 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: sans-serif;
+}
+
+i {
+  cursor: pointer;
+}
+
+a {
+  text-decoration: none;
+  color: white;
+}
+
+h5 {
+  font-size: 36px;
+  font-weight: bold;
+  color: #333;
+  text-align: center;
+  margin-top: 50px;
+}
+
+h6 {
+  font-size: 36px;
+  font-weight: bold;
+  color: #333;
+  text-align: center;
+  margin-top: 50px;
+  margin-bottom: 100px;
+}
+
+.navbar {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  background-color: #212529;
+  color: white;
+  padding: 25px 60px;
+  margin-bottom: 30px;
+}
+
+.cart {
+  position: relative;
+  background-color: #fff;
+  color: #212529;
+  font-size: 30px;
+  padding: 5px;
+  border-radius: 4px;
+}
+
+.cartAmount {
+  position: absolute;
+  top: -15px;
+  right: -10px;
+  font-size: 16px;
+  background-color: red;
+  color: white;
+  padding: 3px;
+  border-radius: 3px;
+}
+
+.container {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 20px;
+  padding: 0 60px;
+}
+
+.shop {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 90vh;
+  width: 65%;
+  margin-left: 5%;
+}
+
+@media (max-width: 1000px) {
+  .shop {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 700px) {
+  .container {
+    flex-direction: column;
+  }
+
+  .shop {
+    grid-template-columns: repeat(1, 1fr);
+  }
+
+  .cart-sidebar {
+    width: 100%;
+    height: auto;
+    position: relative;
+  }
+}
+
+.item {
+  width: 450px;
+  height: 650px;
+  border: 5px solid #000;
+  border-radius: 4px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  margin: auto;
+}
+
+.details {
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  gap: 0px;
+  margin-top: 10px;
+}
+
+
+.details h3 {
+  font-size: 1.2rem;
+  min-height: 2.6em;
+  line-height: 1.4;
+  margin-bottom: 8px;
+}
+
+.details p {
+  font-size: 0.9rem;
+  color: #666;
+  line-height: 1.4;
+  min-height: 5em;
+}
+
+.item img {
+  width: 90%;
+  height: auto;
+  max-height: 450px;
+  object-fit: contain;
+  border-radius: 4px;
+}
+
+.price-quantity {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 1px;
+}
+
+.price-quantity h2 {
+  font-size: 1.3rem;
+  flex-shrink: 0;
+}
+
+.buttons {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.bi-dash-lg {
+  color: red;
+}
+
+.bi-plus-lg {
+  color: green;
+}
+
+.cart-sidebar {
+  flex: 0 0 320px;
+  min-width: 350px;
+  max-width: 380px;
+  padding: 20px;
+  background-color: #f8f9fa;
+  height: calc(100vh - 100px);
+  position: sticky;
+  top: 100px;
+  right: 0;
+  overflow-y: auto;
+  border-left: 3px solid #212529;
+}
+
+.cart-sidebar h3 {
+  margin-bottom: 20px;
+  text-align: center;
+}
+
+#cart-items {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.cart-item {
+  border: 1px solid #212529;
+  border-radius: 4px;
+  padding: 8px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.cart-item img {
+  width: 55px;
+  height: auto;
+  margin-right: 15px;
+}
+
+
+.cart-item span {
+  font-size: 14px;
+}
+
+.cart-total {
+  font-weight: bold;
+  font-size: 16px;
+  text-align: center;
+  margin-top: 20px;
+}
+
+.checkout {
+  display: block;
+  width: 100%;
+  padding: 10px;
+  background-color: green;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  text-align: center;
+  font-size: 14px;
+  margin-top: 10px;
+}
+
+.removeAll {
+  background-color: red;
+  width: 100%;
+  padding: 10px;
+  font-size: 14px;
+  border: none;
+  border-radius: 4px;
+  color: white;
+  cursor: pointer;
+  margin-top: 20px;
+}
+
+.bi-trash {
+  color: gray;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.button-container {
+  display: flex;
+  justify-content: center;
+  gap: 15px;
+  margin-top: 20px;
+}
+
+.success-btn {
+  background-color: green;
+  width: 40%;
+  padding: 10px;
+  color: white;
+}
+
+.failed-btn {
+  background-color: red;
+  width: 40%;
+  padding: 10px;
+  color: white;
+}

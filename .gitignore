@@ -1,0 +1,100 @@
+# Python相关忽略文件
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.log
+venv/
+env/
+*.egg-info/
+build/
+dist/
+
+# ROS和DepthAI相关
+devel/
+build/
+logs/
+catkin_ws/
+src/CMakeLists.txt.user
+
+# Docker相关
+*.tar
+Dockerfile.save
+Dockerfile.copy
+.dockerignore
+
+# VSCode和IDE相关
+.vscode/
+*.code-workspace
+*.idea/
+*.sublime-project
+*.sublime-workspace
+
+# 依赖管理文件
+Pipfile
+Pipfile.lock
+poetry.lock
+node_modules/
+package-lock.json
+yarn.lock
+
+# HTML/JS相关
+/web/node_modules/
+*.map
+
+# 编译生成文件
+*.o
+*.so
+*.a
+*.out
+*.obj
+*.dll
+*.exe
+*.class
+*.jar
+*.war
+*.ear
+
+# 临时文件
+*.swp
+*.swo
+*.tmp
+*.bak
+*.orig
+*.save
+.DS_Store
+Thumbs.db
+
+# Model、Cache相关
+
+# models/
+# piper_models/
+# vosk/
+# audios/
+# dataset/
+# weights/
+# checkpoints/
+*.h5
+*.onnx
+*.tflite
+*.pb
+*.blob
+
+# 服务器端和运行时文件
+server.log
+nohup.out
+debug.log
+*.pid
+*.sock
+*.db
+instance/
+__cache__/
+
+# 个人配置和密钥
+*.env
+.env.local
+.env.production
+*.pem
+*.crt
+*.key
+
